@@ -4,13 +4,15 @@ from discord import app_commands
 from discord.ext import commands
 from openai import AsyncOpenAI
 
+DEFAULT_OPENROUTER_MODEL = "google/gemma-4-31b-it:free"
+
 # Inicializa o cliente OpenRouter
 client = AsyncOpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=os.getenv("OPENROUTER_API_KEY"),
 )
 
-async def generate_text(prompt: str, model: str = "nvidia/nemotron-3-super-120b-a12b:free") -> str:
+async def generate_text(prompt: str, model: str = DEFAULT_OPENROUTER_MODEL) -> str:
     response = await client.chat.completions.create(
         model=model,
         messages=[
@@ -33,11 +35,12 @@ class OpenRouter(commands.Cog):
         self,
         interact: discord.Interaction,
         prompt: str,
-        model: str = "nvidia/nemotron-3-super-120b-a12b:free"
+        model: str | None = None
     ):
         await interact.response.defer()
         try:
-            generated_text = await generate_text(prompt, model)
+            selected_model = model or DEFAULT_OPENROUTER_MODEL
+            generated_text = await generate_text(prompt, selected_model)
 
             if len(generated_text) > 2000:
                 generated_text = generated_text[:1997] + "..."
