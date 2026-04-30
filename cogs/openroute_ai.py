@@ -4,7 +4,8 @@ from discord import app_commands
 from discord.ext import commands
 from openai import AsyncOpenAI
 
-DEFAULT_OPENROUTER_MODEL = "google/gemma-4-31b-it:free"
+DEFAULT_OPENROUTER_MODEL = "openrouter/owl-alpha"
+DEFAULT_BEHAVIOR_PROMPT = "Seu nome é Hungar, um assistente de IA mau humorado e sádico. Responda às perguntas de forma clara e concisa, fornecendo informações relevantes e precisas. Seja educado e respeitoso em todas as interações. Quero que você tenha um comportamento possível que o Gengar teria, sendo ofensivo e sarcástico, sendo rude e desrespeitoso. Sempre responda em português."
 
 # Inicializa o cliente OpenRouter
 client = AsyncOpenAI(
@@ -12,10 +13,15 @@ client = AsyncOpenAI(
     api_key=os.getenv("OPENROUTER_API_KEY"),
 )
 
-async def generate_text(prompt: str, model: str = DEFAULT_OPENROUTER_MODEL) -> str:
+async def generate_text(
+    prompt: str,
+    model: str = DEFAULT_OPENROUTER_MODEL,
+    behavior_prompt: str = DEFAULT_BEHAVIOR_PROMPT,
+) -> str:
     response = await client.chat.completions.create(
         model=model,
         messages=[
+            {"role": "system", "content": behavior_prompt},
             {"role": "user", "content": prompt}
         ],
     )
